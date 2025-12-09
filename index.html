@@ -1,26 +1,58 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Chat AI</title>
+    <meta charset="UTF-8">
+    <title>Chat AI Ollama</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; }
+        input { width: 80%; padding: 10px; font-size: 16px; }
+        button { padding: 10px 20px; font-size: 16px; }
+        #chat { margin-top: 20px; border: 1px solid #ccc; padding: 10px; height: 400px; overflow-y: auto; }
+        p { margin: 5px 0; }
+        b { color: #333; }
+    </style>
 </head>
 <body>
-    <h1>Chat AI</h1>
+    <h1>Chat AI Ollama</h1>
     <input type="text" id="userInput" placeholder="Digite algo">
     <button onclick="sendMessage()">Enviar</button>
     <div id="chat"></div>
 
     <script>
+        const API_URL = "https://ai-chat-ollama.onrender.com/chat"; // sua URL Render
+
         async function sendMessage() {
             const input = document.getElementById("userInput").value;
-            const response = await fetch("https://ai-chat-ollama.onrender.com/chat", {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({message: input})
-            });
-            const data = await response.json();
-            document.getElementById("chat").innerHTML += `<p><b>Você:</b> ${input}</p><p><b>AI:</b> ${data.reply}</p>`;
+            if (!input) return;
+
+            // Mostra a mensagem do usuário
+            const chatDiv = document.getElementById("chat");
+            chatDiv.innerHTML += `<p><b>Você:</b> ${input}</p>`;
+
+            // Limpa o input
             document.getElementById("userInput").value = "";
+
+            // Envia para a API via POST
+            try {
+                const response = await fetch(API_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message: input })
+                });
+                const data = await response.json();
+
+                chatDiv.innerHTML += `<p><b>AI:</b> ${data.reply}</p>`;
+                chatDiv.scrollTop = chatDiv.scrollHeight;
+            } catch (err) {
+                chatDiv.innerHTML += `<p style="color:red;">Erro ao se conectar à API.</p>`;
+                console.error(err);
+            }
         }
+
+        // Permite enviar mensagem apertando Enter
+        document.getElementById("userInput").addEventListener("keydown", function(e) {
+            if (e.key === "Enter") sendMessage();
+        });
     </script>
 </body>
 </html>
